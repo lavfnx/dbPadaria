@@ -34,10 +34,23 @@ idFornecedor int not null,
 foreign key (idFornecedor) references fornecedores(idFornecedor)
 );
 
+alter table produtos add column validadeProduto date after categoriaProduto;
+alter table produtos add column pesoProduto decimal(10,2) after validadeProduto;
+alter table produtos add column ingredientesProduto text after pesoProduto;
+
+describe produtos;
+
 insert into produtos (nomeProduto, descricaoProduto, precoProduto, estoqueProduto, categoriaProduto, idFornecedor) values
 ("Bolo de chocolate", "Bolo de chocolate confeitado, que leva cacau em pó em sua confecção.", 50.00, 5, "Bolos", 1);
 insert into produtos (nomeProduto, descricaoProduto, precoProduto, estoqueProduto, categoriaProduto, idFornecedor) values
 ("Pão de queijo", "Pão de queijo de consistência macia e elástica, composto por queijo mussarela e parmesão.", 5.00, 8, "Pães", 1);
+
+insert into produtos (nomeProduto, descricaoProduto, precoProduto, estoqueProduto, categoriaProduto, validadeProduto, pesoProduto, ingredientesProduto, idFornecedor) values
+("Brigadeiro goumert", "Brigadeiro fresco cremoso e macio.", 7.00, 15, "Confeitaria", "2023-11-16", 50, "Cacau em pó 10%, leite condensado, creme de leite, manteiga sem gordura hidrogenada e granulado de chocolate.", 1);
+insert into produtos (nomeProduto, descricaoProduto, precoProduto, estoqueProduto, categoriaProduto, validadeProduto, pesoProduto, ingredientesProduto, idFornecedor) values
+("Coxinha", "Coxinha feita com frango temperado.", 6.00, 12, "Salgados", "2023-11-20", 300,  "Farinha de trigo, manteiga, azeite, peito de frango cozido e desfiado, sal, alho e tempero a gosto, ovo, leite, farinha de rosca torrada.", 1);
+insert into produtos (nomeProduto, descricaoProduto, precoProduto, estoqueProduto, categoriaProduto, validadeProduto, pesoProduto, ingredientesProduto, idFornecedor) values
+("Pão de aveia", "Pão a base de aveia", 7.80, 3, "Pães", "2023-11-22", 50, "Aveia, polvilho doce, fermento, sal, azeite, mel.", 1);
 
 select * from produtos where categoriaProduto = "Pães";
 
@@ -89,3 +102,25 @@ select idPedido from pedidos;
 insert into itensPedidos(idPedido, idProduto, quantidade) values (1, 2, 2);
 insert into itensPedidos(idPedido, idProduto, quantidade) values (1, 1, 1);
 
+/* quem comprou? quando comprou? o que comprou? quanto comprou? */
+
+select clientes.nomeCliente, pedidos.idPedido, pedidos.dataPedido, itensPedidos.quantidade, produtos.nomeProduto, produtos.precoProduto
+from pedidos inner join clientes on pedidos.idCliente = pedidos.idCliente inner join
+itensPedidos on pedidos.idPedido = itensPedidos.idPedido inner join 
+produtos on produtos.idProduto = itensPedidos.idProduto;
+
+
+select sum(produtos.precoProduto * itensPedidos.quantidade) as Total from produtos inner join itensPedidos on produtos.idProduto = itensPedidos.idProduto where idPedido = 1;
+
+/* POSSÍVEIS FILTROS PARA A PADARIA */
+
+/* Filtrar produtos por validade (por exemplo, produtos com validade maior que a data atual) */
+select * from produtos where validadeProduto > curdate();
+
+
+/* Filtrar produtos que contenham um ingrediente específico */
+select * from produtos where ingredientesProduto like '%manteiga%';
+
+/* atividade */
+
+select * from produtos where categoriaProduto = "Pães" and ingredientesProduto not like '%farinha%' and precoProduto < 7.90;
